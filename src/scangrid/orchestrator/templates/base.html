@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ScanGrid{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="/static/logo.svg">
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <header>
+    <h1><img src="/static/logo.svg" class="logo" alt=""> ScanGrid</h1>
+    <nav>
+      {% set p = request.url.path %}
+      <a href="/" class="{{ 'active' if p == '/' }}">Overview</a>
+      <a href="/targets" class="{{ 'active' if p == '/targets' }}">Targets</a>
+      <a href="/hosts" class="{{ 'active' if p == '/hosts' }}">Inventory</a>
+      <a href="/findings" class="{{ 'active' if p == '/findings' }}">Findings</a>
+      <a href="/changes" class="{{ 'active' if p == '/changes' }}">Changes</a>
+      <a href="/jobs" class="{{ 'active' if p == '/jobs' }}">Jobs</a>
+      <a href="/docs">API</a>
+    </nav>
+  </header>
+  <main>{% block body %}{% endblock %}</main>
+  <footer>ScanGrid v{{ version }} &middot; {{ now.strftime('%Y-%m-%d %H:%M UTC') }}</footer>
+</body>
+</html>

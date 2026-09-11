@@ -1,0 +1,31 @@
+---
+- name: Enable + start orchestrator
+  ansible.builtin.systemd:
+    name: scangrid-orchestrator.service
+    state: started
+    enabled: true
+
+- name: Wait for the API
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ scangrid_api_port | default(8090) }}/healthz"
+    status_code: 200
+  register: health
+  retries: 10
+  delay: 3
+  until: health.status == 200
+
+- name: Optionally seed a target from inventory
+  ansible.builtin.command:
+    cmd: >-
+      /opt/scangrid/venv/bin/scangrid add-target
+      {{ scangrid_seed_target_name | default('home') }}
+      {{ scangrid_seed_target_spec }}
+      --every {{ scangrid_seed_target_every | default(1440) }}
+  environment:
+    SCANGRID_DATA_DIR: /var/lib/scangrid
+    SCANGRID_ALLOWLIST: "{{ scangrid_allowlist }}"
+  become_user: scangrid
+  when: scangrid_seed_target_spec is defined
+  register: seed
+  changed_when: "'added' in seed.stdout"
+  failed_when: false

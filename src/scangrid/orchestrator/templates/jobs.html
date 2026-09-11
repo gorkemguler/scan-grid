@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}ScanGrid &middot; Jobs{% endblock %}
+{% block body %}
+<h2>Scan jobs (latest {{ jobs | length }})</h2>
+<table>
+  <tr><th>ID</th><th>Target</th><th>State</th><th>Worker</th><th>Attempts</th><th>Created</th><th>Finished</th><th>Error</th></tr>
+  {% for j in jobs %}
+  <tr>
+    <td>{{ j.id }}</td>
+    <td>{{ j.target_id }}</td>
+    <td><code>{{ j.state }}</code></td>
+    <td class="mono">{{ j.worker_id or "—" }}</td>
+    <td>{{ j.attempts }}</td>
+    <td class="muted">{{ j.created_at | ago }}</td>
+    <td class="muted">{{ j.finished_at | ago }}</td>
+    <td class="muted">{{ j.error }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="8" class="muted">No jobs yet.</td></tr>
+  {% endfor %}
+</table>
+
+<h2>Recent completed scans</h2>
+<table>
+  <tr><th>Scan</th><th>Target</th><th>Started</th><th>Hosts up</th><th>Open services</th></tr>
+  {% for s in scans %}
+  <tr>
+    <td>{{ s.id }}</td>
+    <td>{{ s.target_id }}</td>
+    <td class="muted">{{ s.started_at | ago }}</td>
+    <td>{{ s.hosts_up }} / {{ s.hosts_total }}</td>
+    <td>{{ s.services_open }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="5" class="muted">No completed scans.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

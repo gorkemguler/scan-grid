@@ -1,0 +1,62 @@
+---
+- name: Packages
+  ansible.builtin.apt:
+    name: "{{ scangrid_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Service account
+  ansible.builtin.user:
+    name: scangrid
+    system: true
+    home: /opt/scangrid
+    shell: /usr/sbin/nologin
+    create_home: false
+
+- name: Directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode | default('0755') }}"
+  loop:
+    - { path: /opt/scangrid }
+    - { path: /etc/scangrid, mode: "0750", group: scangrid }
+    - { path: /var/lib/scangrid, owner: scangrid, group: scangrid }
+
+- name: Clone / update source
+  ansible.builtin.git:
+    repo: "{{ scangrid_repo_url }}"
+    dest: /opt/scangrid/src
+    version: "{{ scangrid_ref | default('main') }}"
+    depth: 1
+  notify: restart scangrid
+
+- name: Virtualenv + install
+  ansible.builtin.pip:
+    name: /opt/scangrid/src
+    virtualenv: /opt/scangrid/venv
+    virtualenv_command: python3 -m venv
+    extra_args: --upgrade
+  notify: restart scangrid
+
+- name: Render env file
+  ansible.builtin.template:
+    src: scangrid.env.j2
+    dest: /etc/scangrid/scangrid.env
+    owner: root
+    group: scangrid
+    mode: "0640"
+  notify: restart scangrid
+
+- name: Install systemd unit
+  ansible.builtin.copy:
+    src: "/opt/scangrid/src/deploy/systemd/{{ scangrid_unit }}"
+    remote_src: true
+    dest: "/etc/systemd/system/{{ scangrid_unit }}"
+    mode: "0644"
+  notify:
+    - reload systemd
+    - restart scangrid

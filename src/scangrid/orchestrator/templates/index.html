@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}ScanGrid &middot; Overview{% endblock %}
+{% block body %}
+<div class="cards">
+  <div class="card"><div class="n">{{ counters.targets }}</div><div class="l">Targets</div></div>
+  <div class="card"><div class="n">{{ counters.hosts_up }}</div><div class="l">Hosts up</div></div>
+  <div class="card"><div class="n">{{ counters.services_open }}</div><div class="l">Open services</div></div>
+  <div class="card"><div class="n">{{ counters.jobs_queued }}</div><div class="l">Jobs queued</div></div>
+  <div class="card {{ 'bad' if counters.crit_high }}"><div class="n">{{ counters.crit_high }}</div><div class="l">Critical + High</div></div>
+</div>
+
+<h2>Findings by severity</h2>
+{% set total = (sev.values() | sum) or 1 %}
+<div class="bar">
+  <span class="c" style="width: {{ (sev.get('critical', 0) / total * 100) }}%"></span>
+  <span class="h" style="width: {{ (sev.get('high', 0) / total * 100) }}%"></span>
+  <span class="m" style="width: {{ (sev.get('medium', 0) / total * 100) }}%"></span>
+  <span class="l" style="width: {{ (sev.get('low', 0) / total * 100) }}%"></span>
+</div>
+<p class="muted">
+  critical {{ sev.get('critical', 0) }} &middot; high {{ sev.get('high', 0) }} &middot;
+  medium {{ sev.get('medium', 0) }} &middot; low {{ sev.get('low', 0) }} &middot;
+  unknown {{ sev.get('unknown', 0) }}
+</p>
+
+<h2>Top findings</h2>
+<table>
+  <tr><th>CVSS</th><th>Sev</th><th>CVE</th><th>Host</th><th>Summary</th></tr>
+  {% for f in top_findings %}
+  <tr>
+    <td>{{ "%.1f"|format(f.cvss) }}</td>
+    <td><span class="badge sev-{{ f.severity }}">{{ f.severity }}</span></td>
+    <td class="mono"><a href="https://nvd.nist.gov/vuln/detail/{{ f.cve_id }}">{{ f.cve_id }}</a></td>
+    <td class="mono">{{ f.host_ip }}</td>
+    <td class="muted">{{ f.summary[:140] }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="5" class="muted">No findings yet. Add a target and run a scan.</td></tr>
+  {% endfor %}
+</table>
+
+<h2>Recent changes</h2>
+<table>
+  <tr><th>When</th><th>Kind</th><th>Host</th><th>Sev</th><th>Detail</th></tr>
+  {% for c in recent_changes %}
+  <tr>
+    <td class="muted">{{ c.ts | ago }}</td>
+    <td><code>{{ c.kind }}</code></td>
+    <td class="mono">{{ c.host_ip }}</td>
+    <td><span class="badge sev-{{ c.severity }}">{{ c.severity }}</span></td>
+    <td class="muted mono">{{ c.detail_json[:160] }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="5" class="muted">No changes recorded.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

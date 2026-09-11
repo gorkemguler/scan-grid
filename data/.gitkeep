@@ -1,0 +1,3 @@
+# Runtime data lives here (SQLite DB under ../var by default).
+# NVD offline feeds, if you use the offline CVE provider, go in ./nvd/
+# (git-ignored). Fetch them with deploy/scripts/fetch-nvd-feeds.sh

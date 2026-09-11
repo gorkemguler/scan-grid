@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}ScanGrid &middot; Changes{% endblock %}
+{% block body %}
+<h2>Change log - last 14 days ({{ changes | length }})</h2>
+<table>
+  <tr><th>When</th><th>Kind</th><th>Host</th><th>Sev</th><th>Notified</th><th>Detail</th></tr>
+  {% for c in changes %}
+  <tr>
+    <td class="muted">{{ c.ts | ago }}</td>
+    <td><code>{{ c.kind }}</code></td>
+    <td class="mono">{{ c.host_ip }}</td>
+    <td><span class="badge sev-{{ c.severity }}">{{ c.severity }}</span></td>
+    <td>{{ "✓" if c.notified else "·" }}</td>
+    <td class="muted mono">{{ c.detail_json[:220] }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="6" class="muted">No changes yet - needs at least two scans of a target.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

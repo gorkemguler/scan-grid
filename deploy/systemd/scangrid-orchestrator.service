@@ -1,0 +1,32 @@
+[Unit]
+Description=ScanGrid orchestrator (API + dashboard + scheduler)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=scangrid
+Group=scangrid
+EnvironmentFile=/etc/scangrid/scangrid.env
+Environment=SCANGRID_ROLE=orchestrator
+Environment=SCANGRID_DATA_DIR=/var/lib/scangrid
+ExecStart=/opt/scangrid/venv/bin/scangrid orchestrator
+Restart=on-failure
+RestartSec=5
+StateDirectory=scangrid
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/scangrid
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

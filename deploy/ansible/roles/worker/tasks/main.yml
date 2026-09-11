@@ -1,0 +1,25 @@
+---
+- name: Refuse a non-private allowlist unless explicitly opted in
+  ansible.builtin.assert:
+    that:
+      - >-
+        scangrid_allow_public_targets | default(false) | bool
+        or scangrid_allowlist is match('^(10\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.|192\\.168\\.|127\\.)')
+    fail_msg: >-
+      scangrid_allowlist ({{ scangrid_allowlist }}) is not RFC1918/loopback and
+      scangrid_allow_public_targets is not true. Refusing to configure a worker
+      that could scan the internet.
+
+- name: Enable + start worker
+  ansible.builtin.systemd:
+    name: scangrid-worker.service
+    state: started
+    enabled: true
+
+- name: Recent worker logs
+  ansible.builtin.command: journalctl -u scangrid-worker.service -n 20 --no-pager
+  changed_when: false
+  register: wlog
+
+- ansible.builtin.debug:
+    var: wlog.stdout_lines

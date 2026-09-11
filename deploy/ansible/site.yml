@@ -1,0 +1,25 @@
+---
+# Provision both Pis:  ansible-playbook -i inventory.ini site.yml
+# Re-run to update to the latest commit on scangrid_ref.
+
+- name: ScanGrid orchestrator
+  hosts: orchestrator
+  become: true
+  vars:
+    scangrid_role: orchestrator
+    scangrid_unit: scangrid-orchestrator.service
+    scangrid_packages: [git, python3, python3-venv, python3-dev, curl, ca-certificates]
+  roles:
+    - common
+    - orchestrator
+
+- name: ScanGrid worker
+  hosts: worker
+  become: true
+  vars:
+    scangrid_role: worker
+    scangrid_unit: scangrid-worker.service
+    scangrid_packages: [git, python3, python3-venv, python3-dev, nmap, libcap2-bin, curl, ca-certificates]
+  roles:
+    - common
+    - worker

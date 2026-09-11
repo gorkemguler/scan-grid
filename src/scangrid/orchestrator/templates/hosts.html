@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}ScanGrid &middot; Inventory{% endblock %}
+{% block body %}
+<h2>Asset inventory ({{ rows | length }} hosts)</h2>
+<table>
+  <tr><th>State</th><th>IP</th><th>Hostname</th><th>Vendor / OS</th><th>Open ports</th><th>Findings</th><th>Last seen</th></tr>
+  {% for h, svcs, nf in rows %}
+  <tr>
+    <td class="state-{{ h.state }}">{{ h.state }}</td>
+    <td class="mono">{{ h.ip }}</td>
+    <td>{{ h.hostname or "—" }}</td>
+    <td class="muted">{{ h.vendor or h.os_guess or "—" }}</td>
+    <td class="mono">
+      {% for s in svcs %}{{ s.port }}/{{ s.proto }}{% if s.product %}&nbsp;({{ s.product }}{{ " " ~ s.version if s.version }}){% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
+      {% if not svcs %}<span class="muted">none</span>{% endif %}
+    </td>
+    <td>{% if nf %}<span class="badge sev-high">{{ nf }}</span>{% else %}0{% endif %}</td>
+    <td class="muted">{{ h.last_seen | ago }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="7" class="muted">No hosts discovered yet.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

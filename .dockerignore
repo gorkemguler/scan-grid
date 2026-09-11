@@ -1,0 +1,17 @@
+.git
+.github
+.venv
+.venv-*
+var/
+*.db*
+.env
+.pytest_cache
+.ruff_cache
+.mypy_cache
+__pycache__/
+docs/
+deploy/ansible/
+tests/
+data/nvd/
+*.md
+!README.md

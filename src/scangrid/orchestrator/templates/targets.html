@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}ScanGrid &middot; Targets{% endblock %}
+{% block body %}
+<h2>Targets ({{ targets | length }})</h2>
+<p class="muted">Manage via the API: <code>POST /api/targets</code>,
+<code>POST /api/targets/&lt;id&gt;/scan</code>, <code>GET /api/targets/&lt;id&gt;/preview</code>.</p>
+<table>
+  <tr><th>Name</th><th>Spec</th><th>nmap args</th><th>Every</th><th>Enabled</th><th>Last queued</th><th>Last scan</th></tr>
+  {% for t in targets %}
+  <tr>
+    <td>{{ t.name }}</td>
+    <td class="mono">{{ t.spec }}</td>
+    <td class="mono muted">{{ t.nmap_args or "(default)" }}</td>
+    <td>{{ t.interval_minutes }} min{{ " (manual)" if t.interval_minutes == 0 }}</td>
+    <td>{{ "yes" if t.enabled else "no" }}</td>
+    <td class="muted">{{ t.last_queued_at | ago }}</td>
+    <td class="muted">{{ t.last_scan_at | ago }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="7" class="muted">No targets. <code>scangrid add-target home 192.168.1.0/24</code></td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

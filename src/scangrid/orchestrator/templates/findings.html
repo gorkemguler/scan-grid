@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}ScanGrid &middot; Findings{% endblock %}
+{% block body %}
+<h2>CVE findings ({{ rows | length }})</h2>
+<p class="muted">Mute noise with <code>POST /api/findings/&lt;id&gt;/mute</code>. Matches are
+heuristic (service banner &rarr; CPE &rarr; NVD); verify before acting.</p>
+<table>
+  <tr><th>CVSS</th><th>Sev</th><th>CVE</th><th>Host</th><th>Service</th><th>Summary</th><th>Published</th></tr>
+  {% for f, s in rows %}
+  <tr>
+    <td>{{ "%.1f"|format(f.cvss) }}</td>
+    <td><span class="badge sev-{{ f.severity }}">{{ f.severity }}</span></td>
+    <td class="mono"><a href="https://nvd.nist.gov/vuln/detail/{{ f.cve_id }}">{{ f.cve_id }}</a></td>
+    <td class="mono">{{ f.host_ip }}</td>
+    <td class="mono">{{ s.port }}/{{ s.proto }} {{ s.product }} {{ s.version }}</td>
+    <td class="muted">{{ f.summary[:200] }}</td>
+    <td class="muted">{{ f.published }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="7" class="muted">No findings.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

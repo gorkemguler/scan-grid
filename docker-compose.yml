@@ -1,0 +1,37 @@
+# Laptop demo: orchestrator + one worker. The worker is allow-listed for
+# 127.0.0.1 only and does an unprivileged connect scan (-sT) of itself, so the
+# whole stack is self-contained and harmless.
+#
+#   docker compose up --build   ->   http://localhost:8090
+#   then:  docker compose exec orchestrator scangrid add-target self 127.0.0.1 --every 0 --scan-now
+
+services:
+  orchestrator:
+    build: .
+    command: ["scangrid", "orchestrator"]
+    environment:
+      SCANGRID_ROLE: orchestrator
+      SCANGRID_API_TOKEN: demo-token-change-me
+      SCANGRID_ALLOWLIST: 127.0.0.1/32
+      SCANGRID_CVE_PROVIDER: "none"
+      SCANGRID_NOTIFY_BACKEND: log
+      SCANGRID_DEFAULT_NMAP_ARGS: "-sT -sV -T4 --top-ports 100 -Pn"
+    ports:
+      - "8090:8090"
+    volumes:
+      - orch-data:/data
+
+  worker:
+    build: .
+    command: ["scangrid", "worker"]
+    environment:
+      SCANGRID_ROLE: worker
+      SCANGRID_API_TOKEN: demo-token-change-me
+      SCANGRID_ALLOWLIST: 127.0.0.1/32
+      SCANGRID_ORCHESTRATOR_URL: http://orchestrator:8090
+      SCANGRID_WORKER_ID: worker-docker
+    depends_on:
+      - orchestrator
+
+volumes:
+  orch-data:
